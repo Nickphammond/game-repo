@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+
+<body>
+  <canvas id="myCanvas" width="800" height="600" style="border:1px solid #000000;">
+  </canvas>
+
+  <div>
+    <input type="number" id="positionX" name="positionX" min="0" max="799" value="100">
+    <input type="number" id="positionY" name="positionY" min="0" max="599" value="50">
+  </div>
+  <div id="selectionBox">
+    <div id="selectionContainer0">
+      <select id="direction0">
+        <option value="left" selected="selected"> left
+        </option>
+        <option value="right"> right
+        </option>
+      </select>
+      <input id="color0" type="color">
+    </div>
+  </div>
+  <button onclick="addRule()">Add Rule</button>
+  <button onclick="play()">Play</button>
+  <button onclick="play2()">Play2</button>
+  <script src="langdon-ant.js"></script>
+</body>
+
+</html>
