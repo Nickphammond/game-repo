@@ -3,7 +3,7 @@ defmodule Greetings do
   nameArray = ["Mike", "Kristina", "Justin", "Josh", "Olivia", "Rebecca", "Nick", "Jeff", "Kathryn", "Paul", "Rob", "Clem", "Will", "Jeremy", "Mark", "Thomas"]
 
   def teamMembers do
-    ["Mike", "Kristina"]
+    ["Bob", "Alice"]
   end
 
   def stringEqualilty(string1, string2) do
