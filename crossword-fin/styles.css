@@ -1,0 +1,81 @@
+.box {
+  margin: 0 0px 0px 0;
+  display: inline-block;
+  font: 24px Calibri;
+  width: 1.25em;
+  height: 1.25em;
+  line-height: 1.25em;
+  vertical-align: middle;
+
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+
+}
+
+.outer-box {
+  display: inline-block;
+  clear:both;
+  padding: 0 6px 6px 0;
+  margin: 0 0px 0px 0;
+  background-color: black;
+  position: relative;
+
+
+  font: 24px Calibri;
+  width: 1.25em;
+  height: 1.25em;
+  line-height: 1.25em;
+  vertical-align: middle;
+}
+
+.outer-box-white {
+  display: inline-block;
+  clear:both;
+  padding: 0 6px 6px 0;
+  margin: 0 0px 0px 0;
+  background-color: white;
+  position: relative;
+
+
+  font: 24px Calibri;
+  width: 1.25em;
+  height: 1.25em;
+  line-height: 1.25em;
+  vertical-align: middle;
+}
+
+.letter {
+    background-color: rgb(255,255,255);
+   
+  -webkit-touch-callout: text;
+  -webkit-user-select: text;
+  -khtml-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
+}
+
+.index {
+  background-color: white;
+  margin: 0;
+  font-size: 0.5rem;
+  width: max-content;
+  height: max-content;
+  line-height: 1;
+  position: absolute;
+  right: 4px;
+  top:4px;
+}
+
+.row {
+  white-space: nowrap;
+  
+}
+
+body {
+  overflow: scroll;
+}
