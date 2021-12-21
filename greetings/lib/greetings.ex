@@ -3,7 +3,7 @@ defmodule Greetings do
   nameArray = ["Mike", "Kristina", "Justin", "Josh", "Olivia", "Rebecca", "Nick", "Jeff", "Kathryn", "Paul", "Rob", "Clem", "Will", "Jeremy", "Mark", "Thomas"]
 
   def teamMembers do
-    ["Bob", "Alice"]
+    ["Jeff", "Kathryn", "Paul", "Martin"]
   end
 
   def stringEqualilty(string1, string2) do
@@ -32,6 +32,8 @@ defmodule Greetings do
       verify == "247D3B9F1B7FD25AAF05E6FE0AE8E29964C0213A7E79BF4D34D87B2CD600DFFE" ->
         true
       verify == "0506E7B869267F2F5781748130617A964CDA224102BF6749CCCE393263BD8765" ->
+        true
+      verify == "077B54B274616AE5213C8496D49F0E4658371216EDD82A96F0BAE6321538464C" ->
         true
       verify == "1879C1C9889913DCE7B1184D90ECB117DBAFCA7C9D0D5D2C388B373BB7A96F92" ->
         true
