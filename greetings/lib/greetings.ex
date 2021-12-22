@@ -3,7 +3,7 @@ defmodule Greetings do
   nameArray = ["Mike", "Kristina", "Justin", "Josh", "Olivia", "Rebecca", "Nick", "Jeff", "Kathryn", "Paul", "Rob", "Clem", "Will", "Jeremy", "Mark", "Thomas"]
 
   ## Helper functions
-  
+
   @spec teamMembers() :: [String.t()]
   def teamMembers() do
     ["Alice", "Bob"]
