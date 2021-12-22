@@ -2,27 +2,35 @@ defmodule Greetings do
 
   nameArray = ["Mike", "Kristina", "Justin", "Josh", "Olivia", "Rebecca", "Nick", "Jeff", "Kathryn", "Paul", "Rob", "Clem", "Will", "Jeremy", "Mark", "Thomas"]
 
-  def teamMembers do
+  ## Helper functions
+  
+  @spec teamMembers() :: [String.t()]
+  def teamMembers() do
     ["Alice", "Bob"]
   end
 
+  @spec stringEqualilty(String.t, String.t) :: boolean()
   def stringEqualilty(string1, string2) do
     string1 === string2
   end
 
+  # @spec stringEqualilty(String.t) :: ((String.t) -> boolean())
   def stringEquality(string2), do: fn(string1) -> stringEqualilty(string1, string2) end
 
+  @spec hashString(String.t) :: String.t
   def hashString(string) do
     :crypto.mac(:hmac, :sha256, "key", string)
     |> Base.encode16
   end
 
+  @spec validateString(String.t) :: boolean()
   def validateString(string) do
     string
     |> hashString
     |> stringEqualilty("E1622B75CA5762C9FAEBF6DA6CC959DDEA60ED1428804A3094C4BF8B8F3A108F")
   end
 
+  @spec validateTeamMembers() :: boolean()
   def validateTeamMembers() do
     verify = (Enum.join(Enum.sort(teamMembers()), " ") |> hashString)
     IO.puts(verify)
@@ -50,26 +58,40 @@ defmodule Greetings do
 
   ## poem functions
 
-  def putOnYourGear(x) do
-    validateString(x)
+  @spec putOnYourGear(String.t) :: boolean()
+  def putOnYourGear(string) do
+    validateString(string)
   end
 
+  @spec findYourTeam(boolean()) :: boolean() | :error
   def findYourTeam(true) do
     validateTeamMembers()
   end
 
   def findYourTeam(false) do
     IO.inspect("Did you type in the message from the Xmas card EXACTLY?")
+    :error
   end
 
+  @spec pickAName(boolean() | :error) :: boolean() | :error
   def pickAName(true) do
     IO.puts("You found your team mates! Talk to your team mates and choose a name and give it to administrators. Then paste the secret key they give you into the code")
+    :error
     # putSecretKeyHere:
 
   end
 
   def pickAName(false) do
     IO.inspect("No dice. You haven't guessed your team mates correctly")
+    :error
+  end
+
+  def pickAName(:error) do
+    IO.inspect("No dice. You haven't guessed your team mates correctly")
+    :error
+  end
+
+  def unlockTheGame(:error) do
     :error
   end
 
