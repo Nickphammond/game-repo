@@ -104,9 +104,9 @@ function getLetters(wordDict) {
 function layoutGrid(wordDict) {
   let letterDict = getLetters(wordDict)
   let str = ""
-  for (let j=0; j<24; j++) {
+  for (let j=0; j<21; j++) {
     let row = ""
-    for (let i=0; i<34; i++) {
+    for (let i=0; i<30; i++) {
         const address = `${i}*${j}`
         let value = ""
         let number = 10
