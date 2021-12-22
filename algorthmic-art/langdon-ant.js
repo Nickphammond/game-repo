@@ -1,52 +1,45 @@
 var c = document.getElementById("myCanvas");
 var ctx = c.getContext("2d");
-
 const pixelSize = 4
 const canvasWidth = 800
 const canvasHeight = 600
+const squares = {}
 
-function canvasTile(posX, posY, color) {
+// Fill in canvas
+
+function canvasTile(posX, posY, pixelSize, color) {
   ctx.fillStyle = color
   ctx.fillRect(posX, posY, pixelSize, pixelSize)
 }
 
-// Fill in canvas
-function testCanvas() {
-  let x = 0
-  let y = 0
-  for (let i=0; i<90000; i++) {
-    if (i%800 === 0) {
-      x = 0
-      y++
-    } else {
-      x++
-    }
-    canvasTile(x*pixelSize, y*pixelSize)
-  }
+function mouseDown(event) {
+  const posX = parseInt(event.offsetX/pixelSize)
+  const posY = parseInt(event.offsetY/pixelSize)
+  const address = `${posX}*${posY}`
+  let color = document.getElementById("color1").value;
+  let brushSize
+  squares[address] = color
+  squares["2*2"] = color
+  canvasTile(posX*pixelSize, posY*pixelSize, pixelSize, color)
+  c.addEventListener("mousemove", moveDraw)
 }
 
-const instructionDic = {
-  white: {
-    turn: "right",
-    next: "red"
-  },
-  red: {
-    turn: "right",
-    next: "green"
-  },
-  green: {
-    turn: "right",
-    next: "cyan"
-  },
-  cyan: {
-    turn: "left",
-    next: "yellow"
-  },
-  yellow: {
-    turn: "right",
-    next: "white"
-  }
+function moveDraw(event) {
+  c.addEventListener("mouseup", mouseUp)
+  const posX = parseInt(event.offsetX/pixelSize)
+  const posY = parseInt(event.offsetY/pixelSize)
+  const address = `${posX}*${posY}`
+  let color = document.getElementById("color1").value;
+  let brushSize
+  squares[address] = color
+  canvasTile(posX*pixelSize, posY*pixelSize, pixelSize, color)
 }
+
+function mouseUp() {
+  c.removeEventListener("mousemove",  moveDraw);
+}
+
+c.addEventListener("mousedown", mouseDown)
 
 // Instruction index
 let instructionIndex = 0
@@ -58,16 +51,6 @@ const position = {
   X: 100,
   Y: 50
 }
-
-const squares = {
-  // "99*100": "#CD5C5C",
-  "100*98": "#CD5C5C",
-  "100*99": "#CD5C5C",
-  "100*100": "#CD5C5C",
-  "101*100": "#CD5C5C",
-  "102*99": "#CD5C5C"
-}
-
 
 function turnRight(position, orientation) {
   const newPosition = {}
@@ -99,7 +82,6 @@ function turnLeftOrRight(position, orientation, turn) {
     return turnRight(position, orientation)
   }
 }
-
 
 function instructions(position, orientation, instructionDic) {
   let positionStr = position["X"] + "*" + position["Y"]
@@ -149,8 +131,6 @@ function instructions(position, orientation, instructionDic) {
   return ans
 }
 
-
-
 function antBoard(canvasWidth, canvasHeight, pixelSize) {
   const width = parseInt(canvasWidth/pixelSize)
   const height = parseInt(canvasHeight/pixelSize)
@@ -165,30 +145,43 @@ function antBoard(canvasWidth, canvasHeight, pixelSize) {
       x++
     }
     if (squares[x + "*" + y] !== undefined) {
-      canvasTile(x*4, y*4, squares[x + "*" + y])
+      canvasTile(x*4, y*4, pixelSize, squares[x + "*" + y])
     } else {
-      canvasTile(x*4, y*4, "LightGrey")
+      canvasTile(x*4, y*4, pixelSize, "LightGrey")
     }
   }
 }
 
-antBoard(800, 600, 4)
-
-async function updateColor (instructionDic, position, numberOfSteps) {
+async function updateColor (instructionDic, position, numberOfSteps, pixelSize) {
   let thing
   thing = instructions(position, orient, instructionDic)
-  canvasTile(position["X"]*pixelSize , position["Y"]*pixelSize, squares[position["X"] + "*" + position["Y"]])
+  canvasTile(position["X"]*pixelSize , position["Y"]*pixelSize, pixelSize, squares[position["X"] + "*" + position["Y"]])
   for (let i=0; i<numberOfSteps; i++) {
     let x = thing["position"]['X']
     let y = thing["position"]['Y']
     // await new Promise(r => setTimeout(r, 1));
     thing = instructions(thing["position"], thing["orientation"], instructionDic)
-    canvasTile(x*4 , y*4, squares[x + "*" + y])
+    canvasTile(x*4 , y*4, pixelSize, squares[x + "*" + y])
   }
 }
 
-
 // Buttons and stuff
+
+function defaultSelectionContainer() {
+  const str = 
+  `
+  <div id="selectionContainer0">
+    <select id="direction0">
+      <option value="left" selected="selected"> left
+      </option>
+      <option value="right"> right
+      </option>
+    </select>
+    <input id="color0" type="color">
+  </div>
+  `
+  return str
+}
 
 function selectionContainer(num, color, turn) {
   let Leftstr
@@ -200,7 +193,6 @@ function selectionContainer(num, color, turn) {
     Leftstr = ''
     Rightstr = 'selected="selected"'
   }
-
   let str = 
   `
   <div id="selectionContainer${num}">
@@ -211,8 +203,8 @@ function selectionContainer(num, color, turn) {
       </option>
     </select>
     <input id="color${num}" value="${color}" type="color">
+    <button onclick="removeRule(${num})">Remove</button>
   </div>
-
   `
   return str
 }
@@ -249,11 +241,24 @@ function getPosition() {
   return {X: parseInt(posX), Y: parseInt(posY)}
 }
 
-function addRule() {
+function getNewMaxId() {
   const selectionBox = document.getElementById("selectionBox")
-  const len = selectionBox.children.length
   const list = getValuesOfSelectionBox()
-  selectionBox.innerHTML =  selectionBox.innerHTML + selectionContainer(len, "#000000", "left")
+  let ansId = 0
+  console.log(list[0])
+  for (let i=0; i<list.length; i++) {
+    if (list[i]["id"] > ansId) {
+      ansId = list[i]["id"]
+    }
+  }
+  return parseInt(ansId) + 1
+}
+
+function addRule() {
+  const newID = getNewMaxId()
+  const selectionBox = document.getElementById("selectionBox")
+  const list = getValuesOfSelectionBox()
+  selectionBox.innerHTML =  selectionBox.innerHTML + selectionContainer(newID, "#000000", "left")
   for (let i=0; i<list.length; i++) {
     const id = list[i]["id"]
     const color = list[i]["color"]
@@ -263,6 +268,22 @@ function addRule() {
     colorSection.setAttribute("value", color)
     directionSection.setAttribute("value", turn)
   }
+}
+
+function removeRule(idToDestroy) {
+  console.log(idToDestroy)
+  const selectionBox = document.getElementById("selectionBox")
+  const list = getValuesOfSelectionBox()
+  let htmlString = ""
+  for (let i=0; i<list.length; i++) {
+    const id = list[i]["id"]
+    if (parseInt(idToDestroy)!==parseInt(id) && 0!==parseInt(id)) {
+      const color = list[i]["color"]
+      const turn = list[i]["turn"]
+      htmlString = htmlString + selectionContainer(id, color, turn)
+    }
+  }
+  selectionBox.innerHTML = defaultSelectionContainer() + htmlString
 }
 
 function addInstruction(num, object, selectionBox) {
@@ -279,9 +300,10 @@ function play() {
     let id = getIdFromString(str)
     addInstruction(id, obj, selectionBox)
   }
-  updateColor(obj, getPosition(), 11000)
+  updateColor(obj, getPosition(), 11000, pixelSize)
 }
 
+// Conway Game of Life
 function getX(address) {
   let string = ""
   for (i=0; address[i]!=="*"; i++) {
@@ -324,12 +346,21 @@ function getNeighbours(address) {
 }
 
 function queryAlive(address, squares) {
+  let currentColor=""
   let aliveCount = 0
   let newColor = ""
   const neighbourList = getNeighbours(address)
+  if (squares[address]===undefined) {
+    for (item in neighbourList) {
+      const neighbour = neighbourList[item]
+      if (squares[neighbour]!==undefined) {
+        currentColor=squares[neighbour]
+      }
+    }
+  }
   for (item in neighbourList) {
     const neighbour = neighbourList[item]
-    if (squares[neighbour]!==undefined) {
+    if (squares[neighbour]!==undefined && (squares[neighbour]===currentColor || squares[neighbour]===squares[address] )) {
       newColor = squares[neighbour]
       aliveCount++
     }
@@ -349,9 +380,7 @@ function queryAlive(address, squares) {
   }
 }
 
-console.log(queryAlive("100*99", squares))
-
-function conwayStep(canvasWidth, canvasHeight, pixelSize) {
+function conwayStep(canvasWidth, canvasHeight, pixelSize, squares) {
   const width = parseInt(canvasWidth/pixelSize)
   const height = parseInt(canvasHeight/pixelSize)
   const total = width*height
@@ -371,6 +400,10 @@ function conwayStep(canvasWidth, canvasHeight, pixelSize) {
     } else {
       updatedObj[address] = queryAlive(address, squares)
     }
+    if (squares[address]==="#000000") {
+      console.log(squares[address])
+      console.log(address)
+    }
   }
   x = 0
   y = 0
@@ -384,14 +417,18 @@ function conwayStep(canvasWidth, canvasHeight, pixelSize) {
     const address = x + "*" + y
     squares[address] = updatedObj[address]
     if (updatedObj[address]===undefined) {
-      canvasTile(x*pixelSize, y*pixelSize, "LightGrey")
+      canvasTile(x*pixelSize, y*pixelSize, pixelSize, "LightGrey")
     } else {
-      canvasTile(x*pixelSize, y*pixelSize, updatedObj[address])
+      canvasTile(x*pixelSize, y*pixelSize, pixelSize, updatedObj[address])
     }
   }
   return
 }
 
 function play2() {
-  conwayStep(canvasWidth, canvasHeight, pixelSize) 
+  conwayStep(canvasWidth, canvasHeight, pixelSize, squares)
 }
+
+// Run
+
+antBoard(canvasWidth, canvasHeight, pixelSize)
