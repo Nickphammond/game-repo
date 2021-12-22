@@ -5,29 +5,51 @@
   <canvas id="myCanvas" width="800" height="600" style="border:1px solid #000000;">
   </canvas>
 
-  <div id="pen">
-    <input id="color1" type="color">
-    <input type="number" id="brush-size" name="brush-size" min="0" max="799" value="100">
-  </div>
+  <div style="display: flex; margin-bottom: 100px;">
+    <div id="pen" style="width: 50px; margin-left: 50px;">
+      <h1>Brush</h1>
+      <h3>color</h3>
+      <input id="color1" type="color">
+      <h3>size</h3>
+      <input type="number" id="brush-size" name="brush-size" min="1" max="30" value="1">
+    </div>
 
-  <div>
-    <input type="number" id="positionX" name="positionX" min="0" max="799" value="100">
-    <input type="number" id="positionY" name="positionY" min="0" max="599" value="50">
-  </div>
-  <div id="selectionBox">
-    <div id="selectionContainer0">
-      <select id="direction0">
-        <option value="left" selected="selected"> left
-        </option>
-        <option value="right"> right
-        </option>
-      </select>
-      <input id="color0" type="color">
+    <div id="langdon-ant" style="width: 400px; margin-left: 90px;">
+      <h1>Langdon's Ant</h1>
+      <h3>start position</h3>
+      <div>
+        <input type="number" id="positionX" name="positionX" min="0" max="799" value="100">
+        <input type="number" id="positionY" name="positionY" min="0" max="599" value="50">
+      </div>
+      <h3>number of steps</h3>
+        <div>
+          <input type="number" id="steps-number" name="steps-numbe" min="0" max="1000000" value="11000">
+        </div>
+      <h3>rule list</h3>
+      <p>This is a list of rules. The top rule is the default rule. When it comes across a blank square
+        it places down the selected color and then turn the selected direction.
+        If however it comes to a square of a color in the list it'll place down the next color in the list and then move in the direction selected.
+        The details of the rules don't really matter too much because while some amazing patterns can arise, it's essentially impossible to predict beforehand. You'll have to just fiddle around.
+      </p>
+      <div id="selectionBox" style="margin: 10px">
+        <div id="selectionContainer0">
+          <select id="direction0">
+            <option value="left" selected="selected"> left
+            </option>
+            <option value="right"> right
+            </option>
+          </select>
+          <input id="color0" type="color">
+        </div>
+      </div>
+      <button onclick="addRule()">Add Rule</button>
+      <button onclick="play()">Play</button>
+    </div>
+    <div style="margin-left: 50px;">
+      <h1>Game of Life</h1>
+      <button onclick="play2()">Step</button>
     </div>
   </div>
-  <button onclick="addRule()">Add Rule</button>
-  <button onclick="play()">Play</button>
-  <button onclick="play2()">Play2</button>
   <script src="langdon-ant.js"></script>
 </body>
 

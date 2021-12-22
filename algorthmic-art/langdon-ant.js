@@ -1,5 +1,6 @@
-var c = document.getElementById("myCanvas");
-var ctx = c.getContext("2d");
+const c = document.getElementById("myCanvas");
+const ctx = c.getContext("2d");
+c.addEventListener("mousedown", mouseDown)
 const pixelSize = 4
 const canvasWidth = 800
 const canvasHeight = 600
@@ -12,15 +13,50 @@ function canvasTile(posX, posY, pixelSize, color) {
   ctx.fillRect(posX, posY, pixelSize, pixelSize)
 }
 
+function brushWidth(brushRadius, extent) {
+  if (brushRadius**2 - extent**2 > 0) {
+    return Math.floor(Math.sqrt(brushRadius**2 - extent**2))
+  } else {
+    return 0
+  }
+}
+
+function brush(posX, posY, pixelSize, brushSize, color) {
+  const brushRadius = Math.ceil(brushSize/2)
+  for (let i=0; i<=brushRadius; i++) {
+    const tempXL = (posX - i)
+    const tempXR = (posX + i)
+    const width = brushWidth(brushRadius, i)
+    for (let j=0; j<width; j++) {
+      const tempYD = (posY - j)
+      const tempYU = (posY + j)
+
+      const address1 = `${tempXL}*${tempYD}`
+      canvasTile(tempXL*pixelSize, tempYD*pixelSize, pixelSize, color)
+      squares[address1] = color
+
+      const address2 = `${tempXL}*${tempYD}`
+      canvasTile(tempXL*pixelSize, tempYU*pixelSize, pixelSize, color)
+      squares[address2] = color
+
+      const address3 = `${tempXL}*${tempYD}`
+      canvasTile(tempXR*pixelSize, tempYD*pixelSize, pixelSize, color)
+      squares[address3] = color
+
+      const address4 = `${tempXL}*${tempYD}`
+      canvasTile(tempXR*pixelSize, tempYU*pixelSize, pixelSize, color)
+      squares[address4] = color
+    }
+  }
+}
+
 function mouseDown(event) {
   const posX = parseInt(event.offsetX/pixelSize)
   const posY = parseInt(event.offsetY/pixelSize)
   const address = `${posX}*${posY}`
-  let color = document.getElementById("color1").value;
-  let brushSize
-  squares[address] = color
-  squares["2*2"] = color
-  canvasTile(posX*pixelSize, posY*pixelSize, pixelSize, color)
+  let color = document.getElementById("color1").value
+  let brushSize = document.getElementById("brush-size").value
+  brush(posX, posY, pixelSize, brushSize, color)
   c.addEventListener("mousemove", moveDraw)
 }
 
@@ -30,16 +66,14 @@ function moveDraw(event) {
   const posY = parseInt(event.offsetY/pixelSize)
   const address = `${posX}*${posY}`
   let color = document.getElementById("color1").value;
-  let brushSize
-  squares[address] = color
-  canvasTile(posX*pixelSize, posY*pixelSize, pixelSize, color)
+  let brushSize = document.getElementById("brush-size").value
+  brush(posX, posY, pixelSize, brushSize, color)
 }
 
 function mouseUp() {
   c.removeEventListener("mousemove",  moveDraw);
 }
 
-c.addEventListener("mousedown", mouseDown)
 
 // Instruction index
 let instructionIndex = 0
@@ -167,17 +201,22 @@ async function updateColor (instructionDic, position, numberOfSteps, pixelSize) 
 
 // Buttons and stuff
 
-function defaultSelectionContainer() {
+function defaultSelectionContainer(id) {
+  let removeButton = ""
+  if (parseInt(id) !== 0) {
+    removeButton = `<button onclick="removeRule(${id})">Remove</button>`
+  }
   const str = 
   `
-  <div id="selectionContainer0">
-    <select id="direction0">
+  <div id="selectionContainer${id}">
+    <select id="direction${id}">
       <option value="left" selected="selected"> left
       </option>
       <option value="right"> right
       </option>
     </select>
-    <input id="color0" type="color">
+    <input id="color${id}" type="color">
+    ${removeButton}
   </div>
   `
   return str
@@ -193,6 +232,11 @@ function selectionContainer(num, color, turn) {
     Leftstr = ''
     Rightstr = 'selected="selected"'
   }
+  let removeButton = ""
+  let colorValue = `value="${color}"`
+  if (parseInt(num) !== 0) {
+    removeButton = `<button onclick="removeRule(${num})">Remove</button>`
+  }
   let str = 
   `
   <div id="selectionContainer${num}">
@@ -202,8 +246,8 @@ function selectionContainer(num, color, turn) {
       <option value="right" ${Rightstr}> right
       </option>
     </select>
-    <input id="color${num}" value="${color}" type="color">
-    <button onclick="removeRule(${num})">Remove</button>
+    <input id="color${num}" ${colorValue} type="color">
+    ${removeButton}
   </div>
   `
   return str
@@ -211,22 +255,21 @@ function selectionContainer(num, color, turn) {
 
 function getIdFromString(str){
   const prefixLength = "selectionContainer".length
-  return str.substr(prefixLength, str.length - prefixLength)
+  return parseInt(str.substr(prefixLength, str.length - prefixLength))
 }
 
 function getColor(num) {
-  let colorInputBox = document.getElementById(`color${num}`)
+  const colorInputBox = document.getElementById(`color${num}`)
   return colorInputBox.value
 }
 
 function getDirection(num) {
-  let directionInputBox = document.getElementById(`direction${num}`)
+  const directionInputBox = document.getElementById(`direction${num}`)
   return directionInputBox.value
 }
 
 function getValuesOfSelectionBox() {
   const selectionBoxList = document.getElementById("selectionBox").children
-  const len = selectionBoxList.length
   const answerArray = []
   for (let i=0; i<selectionBoxList.length; i++) {
     let id = getIdFromString(selectionBoxList[i].id)
@@ -241,11 +284,14 @@ function getPosition() {
   return {X: parseInt(posX), Y: parseInt(posY)}
 }
 
+function getNumberOfSteps() {
+  return document.getElementById("steps-number").value;
+}
+
 function getNewMaxId() {
   const selectionBox = document.getElementById("selectionBox")
   const list = getValuesOfSelectionBox()
   let ansId = 0
-  console.log(list[0])
   for (let i=0; i<list.length; i++) {
     if (list[i]["id"] > ansId) {
       ansId = list[i]["id"]
@@ -255,40 +301,63 @@ function getNewMaxId() {
 }
 
 function addRule() {
-  const newID = getNewMaxId()
-  const selectionBox = document.getElementById("selectionBox")
-  const list = getValuesOfSelectionBox()
-  selectionBox.innerHTML =  selectionBox.innerHTML + selectionContainer(newID, "#000000", "left")
-  for (let i=0; i<list.length; i++) {
-    const id = list[i]["id"]
-    const color = list[i]["color"]
-    const turn = list[i]["turn"]
-    const colorSection = document.getElementById(`color${id}`)
-    const directionSection = document.getElementById(`direction${id}`)
-    colorSection.setAttribute("value", color)
-    directionSection.setAttribute("value", turn)
+  let newID = getNewMaxId()
+  if (newID===1) {
+    newID = 2
   }
-}
-
-function removeRule(idToDestroy) {
-  console.log(idToDestroy)
   const selectionBox = document.getElementById("selectionBox")
   const list = getValuesOfSelectionBox()
   let htmlString = ""
   for (let i=0; i<list.length; i++) {
     const id = list[i]["id"]
-    if (parseInt(idToDestroy)!==parseInt(id) && 0!==parseInt(id)) {
+    const color = list[i]["color"]
+    const turn = list[i]["turn"]
+    htmlString = htmlString + selectionContainer(id, color, turn)
+  }
+  selectionBox.innerHTML = htmlString + defaultSelectionContainer(newID)
+}
+
+function removeRule(idToDestroy) {
+  const selectionBox = document.getElementById("selectionBox")
+  const list = getValuesOfSelectionBox()
+  let htmlString = ""
+  for (let i=0; i<list.length; i++) {
+    const id = list[i]["id"]
+    if (parseInt(idToDestroy)!==parseInt(id)) {
       const color = list[i]["color"]
       const turn = list[i]["turn"]
       htmlString = htmlString + selectionContainer(id, color, turn)
     }
   }
-  selectionBox.innerHTML = defaultSelectionContainer() + htmlString
+  selectionBox.innerHTML = htmlString
+}
+
+function nextInstructionId(id){
+  const selectionBox = document.getElementById("selectionBox").children;
+  let maxId = id
+  for (let i=0; i<selectionBox.length; i++) {
+    const str = selectionBox[i].id
+    const tempId = getIdFromString(str)
+    if (tempId>maxId) {
+      maxId = tempId
+    }
+  }
+  let nextId = maxId
+  for (let i=0; i<selectionBox.length; i++) {
+    const str = selectionBox[i].id
+    const tempId = getIdFromString(str)
+    if (tempId<nextId && tempId>id) {
+      nextId = tempId
+    }
+  }
+  if (maxId === id) {
+    nextId = 0
+  }
+  return nextId
 }
 
 function addInstruction(num, object, selectionBox) {
-  const len = selectionBox.length
-  object[getColor(num)] = {turn: getDirection(num), next: getColor((parseInt(num)+1)%len), id: num}
+  object[getColor(num)] = {turn: getDirection(num), next: getColor(nextInstructionId(num)), id: num}
   return object
 }
 
@@ -300,7 +369,7 @@ function play() {
     let id = getIdFromString(str)
     addInstruction(id, obj, selectionBox)
   }
-  updateColor(obj, getPosition(), 11000, pixelSize)
+  updateColor(obj, getPosition(), getNumberOfSteps(), pixelSize)
 }
 
 // Conway Game of Life
@@ -399,10 +468,6 @@ function conwayStep(canvasWidth, canvasHeight, pixelSize, squares) {
       updatedObj[address] = undefined
     } else {
       updatedObj[address] = queryAlive(address, squares)
-    }
-    if (squares[address]==="#000000") {
-      console.log(squares[address])
-      console.log(address)
     }
   }
   x = 0
